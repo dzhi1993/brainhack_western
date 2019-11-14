@@ -30,7 +30,7 @@ Operating System: Apple OSX
       </MD>
       <MD>
          <Name><![CDATA[WorkingDirectory]]></Name>
-         <Value><![CDATA[/Users/eberlot/Documents/MATLAB]]></Value>
+         <Value><![CDATA[/Volumes/MotorControl/data/SuperMotorLearning/surfaceWB/FS_LR_164]]></Value>
       </MD>
    </MetaData>
    <LabelTable>
