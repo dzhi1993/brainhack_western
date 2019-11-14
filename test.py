@@ -11,8 +11,8 @@ vertices_index = img_data[1].flatten()  # the indices of the flatmap (56588, 3)
 vertices_index = np.array(vertices_index, dtype=np.uint32)
 print(vertices_coord.shape, vertices_index.shape)
 
-# Load nii. data
-nii_image = nb.load("onlineAtlas/fs_LR.164k.LR.curvature.dscalar.nii")
+# Load nii. data (underlay color)
+nii_image = nb.load("onlineAtlas/fs_LR.164k.LR.sulc.dscalar.nii")
 underlay_color = nii_image.get_data()
 
 # Load border information
