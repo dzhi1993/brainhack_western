@@ -47,7 +47,7 @@ border_info = np.array(border_info.flatten(), dtype=np.float32)
 # ---- Overlay ---- Making overlay buffer object
 alpha = 0.2  # set overlay transparency
 from matplotlib import cm
-overlay_img = nb.load("onlineAtlas/test.func.gii")  # load left hemisphere
+overlay_img = nb.load("onlineAtlas/data.func.gii")  # load left hemisphere
 overlay_data = [x.data for x in overlay_img.darrays][0]
 overlay_color = cm.jet(overlay_data)  # covert to colormap
 overlay_color[np.where(np.isnan(overlay_data)), 0:3] = underlay_color_L[np.where(np.isnan(overlay_data))]
@@ -55,6 +55,19 @@ overlay_color = overlay_color[:, 0:3]
 overlay_render = np.concatenate((vertices_coord, overlay_color), axis=1)
 overlay_render = np.concatenate((overlay_render, np.reshape(np.repeat(alpha, overlay_render.shape[0]), (overlay_render.shape[0], 1))), axis=1)
 overlay_render = np.array(overlay_render.flatten(), dtype=np.float32)
+
+# ----- Overlay2 ----- Making second overlay buffer object
+alpha = 0.2
+from matplotlib import cm
+overlay_img_2 = nb.load("onlineAtlas/mask.func.gii")  # load left hemisphere
+overlay_data_2 = [x.data for x in overlay_img_2.darrays][0]
+overlay_color_2 = cm.jet(overlay_data_2)  # covert to colormap
+overlay_color_2[np.where(np.isnan(overlay_data_2)), 0:3] = underlay_color_L[np.where(np.isnan(overlay_data_2))]
+overlay_color_2 = overlay_color_2[:, 0:3]
+overlay_render_2 = np.concatenate((vertices_coord, overlay_color_2), axis=1)
+overlay_render_2 = np.concatenate((overlay_render_2, np.reshape(np.repeat(alpha, overlay_render_2.shape[0]), (overlay_render_2.shape[0], 1))), axis=1)
+overlay_render_2 = np.array(overlay_render_2.flatten(), dtype=np.float32)
+
 
 # Python OpenGL entry
 import glfw
@@ -158,6 +171,25 @@ def main():
     glDrawElements(GL_TRIANGLES, vertices_index.shape[0], GL_UNSIGNED_INT, None)
 
 
+    # ----- the overlay 2 rendering ----- #
+    VBO = glGenBuffers(1)
+    glBindBuffer(GL_ARRAY_BUFFER, VBO)
+    glBufferData(GL_ARRAY_BUFFER, overlay_render_2.shape[0] * 4, overlay_render_2, GL_STATIC_DRAW)
+
+    EBO = glGenBuffers(1)
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO)
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, vertices_index.shape[0] * 4, vertices_index, GL_STATIC_DRAW)
+
+    position = glGetAttribLocation(shader, "position")
+    glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 28, ctypes.c_void_p(0))
+    glEnableVertexAttribArray(position)
+
+    color = glGetAttribLocation(shader, "color")
+    glVertexAttribPointer(color, 4, GL_FLOAT, GL_FALSE, 28, ctypes.c_void_p(12))
+    glEnableVertexAttribArray(color)
+    glDrawElements(GL_TRIANGLES, vertices_index.shape[0], GL_UNSIGNED_INT, None)
+
+
     # ----- border buffer object ----- #
     BBO = glGenBuffers(1)
     glBindBuffer(GL_ARRAY_BUFFER, BBO)
@@ -185,4 +217,5 @@ def main():
 
 
 if __name__ == "__main__":
+    print('Start rendering cortical flatmap ...')
     main()
