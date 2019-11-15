@@ -43,13 +43,37 @@ border_info = np.concatenate((border, bcolor), axis=1)
 border_info = np.concatenate((border_info, np.ones((border_info.shape[0], 1))), axis=1)
 border_info = np.array(border_info.flatten(), dtype=np.float32)
 
+border_img = nb.load("onlineAtlas/fs_LR.164k.L.border-CS.func.gii")
+border_data = [x.data for x in border_img.darrays][0]
+border = vertices[np.where(border_data == 1)[0]]
+bcolor = np.array([[0.0, 0.0, 0.0], ] * border.shape[0])  # set border default color
+border_info_1 = np.concatenate((border, bcolor), axis=1)
+border_info_1 = np.concatenate((border_info_1, np.ones((border_info_1.shape[0], 1))), axis=1)
+border_info_1 = np.array(border_info_1.flatten(), dtype=np.float32)
+
+border_img = nb.load("onlineAtlas/fs_LR.164k.L.border-PoCS.func.gii")
+border_data = [x.data for x in border_img.darrays][0]
+border = vertices[np.where(border_data == 1)[0]]
+bcolor = np.array([[0.0, 0.0, 0.0], ] * border.shape[0])  # set border default color
+border_info_2 = np.concatenate((border, bcolor), axis=1)
+border_info_2 = np.concatenate((border_info_2, np.ones((border_info_2.shape[0], 1))), axis=1)
+border_info_2 = np.array(border_info_2.flatten(), dtype=np.float32)
+
+border_img = nb.load("onlineAtlas/fs_LR.164k.L.border-SF.func.gii")
+border_data = [x.data for x in border_img.darrays][0]
+border = vertices[np.where(border_data == 1)[0]]
+bcolor = np.array([[0.0, 0.0, 0.0], ] * border.shape[0])  # set border default color
+border_info_3 = np.concatenate((border, bcolor), axis=1)
+border_info_3 = np.concatenate((border_info_3, np.ones((border_info_3.shape[0], 1))), axis=1)
+border_info_3 = np.array(border_info_3.flatten(), dtype=np.float32)
+
 
 # ---- Overlay ---- Making overlay buffer object
-alpha = 0.2  # set overlay transparency
+alpha = 0.8  # set overlay transparency
 from matplotlib import cm
-overlay_img = nb.load("onlineAtlas/data.func.gii")  # load left hemisphere
+overlay_img = nb.load("onlineAtlas/ROImask.func.gii")  # load left hemisphere
 overlay_data = [x.data for x in overlay_img.darrays][0]
-overlay_color = cm.jet(overlay_data)  # covert to colormap
+overlay_color = cm.YlOrRd(overlay_data)  # covert to colormap
 overlay_color[np.where(np.isnan(overlay_data)), 0:3] = underlay_color_L[np.where(np.isnan(overlay_data))]
 overlay_color = overlay_color[:, 0:3]
 overlay_render = np.concatenate((vertices_coord, overlay_color), axis=1)
@@ -57,9 +81,9 @@ overlay_render = np.concatenate((overlay_render, np.reshape(np.repeat(alpha, ove
 overlay_render = np.array(overlay_render.flatten(), dtype=np.float32)
 
 # ----- Overlay2 ----- Making second overlay buffer object
-alpha = 0.2
+alpha = 0.5
 from matplotlib import cm
-overlay_img_2 = nb.load("onlineAtlas/mask.func.gii")  # load left hemisphere
+overlay_img_2 = nb.load("onlineAtlas/test.func.gii")  # load left hemisphere
 overlay_data_2 = [x.data for x in overlay_img_2.darrays][0]
 overlay_color_2 = cm.jet(overlay_data_2)  # covert to colormap
 overlay_color_2[np.where(np.isnan(overlay_data_2)), 0:3] = underlay_color_L[np.where(np.isnan(overlay_data_2))]
@@ -153,22 +177,22 @@ def main():
 
 
     # ----- the overlay rendering ----- #
-    VBO = glGenBuffers(1)
-    glBindBuffer(GL_ARRAY_BUFFER, VBO)
-    glBufferData(GL_ARRAY_BUFFER, overlay_render.shape[0] * 4, overlay_render, GL_STATIC_DRAW)
-
-    EBO = glGenBuffers(1)
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO)
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, vertices_index.shape[0] * 4, vertices_index, GL_STATIC_DRAW)
-
-    position = glGetAttribLocation(shader, "position")
-    glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 28, ctypes.c_void_p(0))
-    glEnableVertexAttribArray(position)
-
-    color = glGetAttribLocation(shader, "color")
-    glVertexAttribPointer(color, 4, GL_FLOAT, GL_FALSE, 28, ctypes.c_void_p(12))
-    glEnableVertexAttribArray(color)
-    glDrawElements(GL_TRIANGLES, vertices_index.shape[0], GL_UNSIGNED_INT, None)
+    # VBO = glGenBuffers(1)
+    # glBindBuffer(GL_ARRAY_BUFFER, VBO)
+    # glBufferData(GL_ARRAY_BUFFER, overlay_render.shape[0] * 4, overlay_render, GL_STATIC_DRAW)
+    #
+    # EBO = glGenBuffers(1)
+    # glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO)
+    # glBufferData(GL_ELEMENT_ARRAY_BUFFER, vertices_index.shape[0] * 4, vertices_index, GL_STATIC_DRAW)
+    #
+    # position = glGetAttribLocation(shader, "position")
+    # glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 28, ctypes.c_void_p(0))
+    # glEnableVertexAttribArray(position)
+    #
+    # color = glGetAttribLocation(shader, "color")
+    # glVertexAttribPointer(color, 4, GL_FLOAT, GL_FALSE, 28, ctypes.c_void_p(12))
+    # glEnableVertexAttribArray(color)
+    # glDrawElements(GL_TRIANGLES, vertices_index.shape[0], GL_UNSIGNED_INT, None)
 
 
     # ----- the overlay 2 rendering ----- #
@@ -190,20 +214,55 @@ def main():
     glDrawElements(GL_TRIANGLES, vertices_index.shape[0], GL_UNSIGNED_INT, None)
 
 
-    # ----- border buffer object ----- #
+    # ----- border buffer object 1 ----- #
     BBO = glGenBuffers(1)
     glBindBuffer(GL_ARRAY_BUFFER, BBO)
     glBufferData(GL_ARRAY_BUFFER, border_info.shape[0] * 4, border_info, GL_STATIC_DRAW)
-
     b_position = glGetAttribLocation(shader, "position")
     glVertexAttribPointer(b_position, 3, GL_FLOAT, GL_FALSE, 28, ctypes.c_void_p(0))
     glEnableVertexAttribArray(b_position)
-
     b_color = glGetAttribLocation(shader, "color")
     glVertexAttribPointer(b_color, 4, GL_FLOAT, GL_FALSE, 28, ctypes.c_void_p(12))
     glEnableVertexAttribArray(b_color)
-    glPointSize(3)
+    glPointSize(2)
     glDrawArrays(GL_POINTS, 0, int(border_info.shape[0] / 7))
+
+    # ----- border buffer object 2 ----- #
+    BBO = glGenBuffers(1)
+    glBindBuffer(GL_ARRAY_BUFFER, BBO)
+    glBufferData(GL_ARRAY_BUFFER, border_info_1.shape[0] * 4, border_info_1, GL_STATIC_DRAW)
+    b_position = glGetAttribLocation(shader, "position")
+    glVertexAttribPointer(b_position, 3, GL_FLOAT, GL_FALSE, 28, ctypes.c_void_p(0))
+    glEnableVertexAttribArray(b_position)
+    b_color = glGetAttribLocation(shader, "color")
+    glVertexAttribPointer(b_color, 4, GL_FLOAT, GL_FALSE, 28, ctypes.c_void_p(12))
+    glEnableVertexAttribArray(b_color)
+    glDrawArrays(GL_POINTS, 0, int(border_info_1.shape[0] / 7))
+
+    # ----- border buffer object 3 ----- #
+    BBO = glGenBuffers(1)
+    glBindBuffer(GL_ARRAY_BUFFER, BBO)
+    glBufferData(GL_ARRAY_BUFFER, border_info_2.shape[0] * 4, border_info_2, GL_STATIC_DRAW)
+    b_position = glGetAttribLocation(shader, "position")
+    glVertexAttribPointer(b_position, 3, GL_FLOAT, GL_FALSE, 28, ctypes.c_void_p(0))
+    glEnableVertexAttribArray(b_position)
+    b_color = glGetAttribLocation(shader, "color")
+    glVertexAttribPointer(b_color, 4, GL_FLOAT, GL_FALSE, 28, ctypes.c_void_p(12))
+    glEnableVertexAttribArray(b_color)
+    glDrawArrays(GL_POINTS, 0, int(border_info_2.shape[0] / 7))
+
+    # ----- border buffer object 4 ----- #
+    BBO = glGenBuffers(1)
+    glBindBuffer(GL_ARRAY_BUFFER, BBO)
+    glBufferData(GL_ARRAY_BUFFER, border_info_3.shape[0] * 4, border_info_3, GL_STATIC_DRAW)
+    b_position = glGetAttribLocation(shader, "position")
+    glVertexAttribPointer(b_position, 3, GL_FLOAT, GL_FALSE, 28, ctypes.c_void_p(0))
+    glEnableVertexAttribArray(b_position)
+    b_color = glGetAttribLocation(shader, "color")
+    glVertexAttribPointer(b_color, 4, GL_FLOAT, GL_FALSE, 28, ctypes.c_void_p(12))
+    glEnableVertexAttribArray(b_color)
+    glDrawArrays(GL_POINTS, 0, int(border_info_3.shape[0] / 7))
+
 
     glDisable(GL_BLEND)
     glDepthMask(GL_TRUE)
