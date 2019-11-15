@@ -161,14 +161,20 @@ def load_overlays_buffer(filenames, vertices_coord, underlay_color, cmap='jet', 
     return overlays
 
 
-
-
-
 def window_resize(window, width, height):
     glViewport(0, 0, width, height)
 
 
 def render_underlay(underlay, vertices_index, shader):
+    """
+    # ---- Rendering underlay contrast ----
+    Input:
+        underlay: the vertices coordinates buffer of the flatmap for the underlay
+        vertices_index: the flatmap vertices drawing order (faces)
+        shader: the compiled shader program by opengl pipeline
+    Returns:
+        Indexed drawing underlay to the scene
+    """
     VBO = glGenBuffers(1)
     glBindBuffer(GL_ARRAY_BUFFER, VBO)
     glBufferData(GL_ARRAY_BUFFER, underlay.shape[0] * 4, underlay, GL_STATIC_DRAW)
@@ -188,6 +194,15 @@ def render_underlay(underlay, vertices_index, shader):
 
 
 def render_overlays(overlays_buffer, vertices_index, shader):
+    """
+    # ---- Rendering overlays contrast ----
+    Input:
+        overlays_buffer: the vertices coordinates buffers (flatten)
+        vertices_index: the flatmap vertices drawing order (faces)
+        shader: the compiled shader program by opengl pipeline
+    Returns:
+        Indexed drawing overlay to the scene
+    """
     for overlay in overlays_buffer:
         VBO = glGenBuffers(1)
         glBindBuffer(GL_ARRAY_BUFFER, VBO)
@@ -208,6 +223,14 @@ def render_overlays(overlays_buffer, vertices_index, shader):
 
 
 def render_borders(borders_buffer, shader):
+    """
+    # ---- Rendering borders ----
+    Input:
+        borders_buffer: the border buffers objects (flatten)
+        shader: the compiled shader program by opengl pipeline
+    Returns:
+        Indexed drawing selected borders to the scene
+    """
     for border_info in borders_buffer:
         BBO = glGenBuffers(1)
         glBindBuffer(GL_ARRAY_BUFFER, BBO)
@@ -225,7 +248,16 @@ def render_borders(borders_buffer, shader):
 
 
 def render(vertices_index, borders, underlay, overlays):
-
+    """
+    # ---- The main entry of the OpenGL rendering ----
+    Input:
+        vertices_index: the flatmap vertices drawing order (faces)
+        borders: the border buffers objects (flatten) shape list(N, )
+        underlay: the underlay buffers object
+        overlays: the overlays buffer object (flatten), shape list(N, )
+    Returns:
+        Draw the scene
+    """
     # initialize glfw
     if not glfw.init():
         return
@@ -252,16 +284,12 @@ def render(vertices_index, borders, underlay, overlays):
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     glDepthMask(GL_FALSE)
 
-    # ----- the underlay rendering ----- #
-    render_underlay(underlay, vertices_index, shader)
+    # rendering objects
+    render_underlay(underlay, vertices_index, shader)  # -- the underlay rendering
+    render_overlays(overlays, vertices_index, shader)  # -- the overlays rendering
+    render_borders(borders, shader)  # -- border buffer object
 
-    # ----- the overlays rendering ----- #
-    render_overlays(overlays, vertices_index, shader)
-
-    # ----- border buffer object ----- #
-    render_borders(borders, shader)
-
-    glDisable(GL_BLEND)
+    glDisable(GL_BLEND)  # Disable gl blending from this point
     glDepthMask(GL_TRUE)
 
     glfw.swap_buffers(window)
@@ -292,5 +320,4 @@ if __name__ == "__main__":
     borders_buffer = load_borders_buffer(borders, vertices_coord)
 
     render(vertices_index, borders_buffer, underlay_buffer, overlays_buffer)
-
 
