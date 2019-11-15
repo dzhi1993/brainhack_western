@@ -38,9 +38,6 @@ the default setting has two overlays (test.func.gii, test2.func.gii), which can 
 All data stored in onlineAtlas folder 
 
 The flatmap topology file is `fs_LR.164k.L.flat.surf.gii`
-
 The default left hemisphere underlay is `fs_LR.164k.LR.sulc.dscalar.nii`
-
-The borders information can be loaded via `onlineAtlas/fs_LR.164k.L.border-CS.func.gii`, `onlineAtlas/fs_LR.164k.L.border-IPS.func.gii`, `onlineAtlas/fs_LR.164k.L.border-PoCS.func.gii`, `onlineAtlas/fs_LR.164k.L.border-SF.func.gii`.
-
+The borders information can be loaded via `fs_LR.164k.L.border-CS.func.gii`, `fs_LR.164k.L.border-IPS.func.gii`, `fs_LR.164k.L.border-PoCS.func.gii`, `fs_LR.164k.L.border-SF.func.gii`.
 The default loaded overlays are `test.func.gii` and `test2.func.gii`
